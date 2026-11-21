@@ -1169,7 +1169,7 @@ async function compress(file, maxW=1000){
 
 // ---------- actions ----------
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
-function dbErr(e){ const c = e && e.code || ''; if (c==='resource-exhausted' || c==='quota_exceeded') return '今日の利用量の上限に達しました。しばらくしてからお試しください。'; if (c==='permission-denied') return 'この操作をする権限がありません。18歳未満の方の投稿には、保護者の方の同意が必要です。'; return '保存できませんでした。通信状況を確かめて、もう一度お試しください。'; }
+function dbErr(e){ const c = e && e.code || ''; if (c==='resource-exhausted' || c==='quota_exceeded') return '今日の利用量の上限に達しました。しばらくしてからお試しください。'; if (c==='permission-denied') return (S.me && S.me.age==='minor' && !S.me.guardian) ? 'この操作をする権限がありません。18歳未満の方の投稿には、保護者の方の同意が必要です。' : 'この操作をする権限がありません。運営に連絡してください。' + (e.detail ? `（詳しい内容：${e.detail}）` : ''); return '保存できませんでした。通信状況を確かめて、もう一度お試しください。'; }
 
 async function saveWork(e){
   e.preventDefault();

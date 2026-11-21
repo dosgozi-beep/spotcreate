@@ -17,6 +17,7 @@ const snap = (id, data) => ({ id, exists: data !== undefined && data !== null, d
 function dbError(e) {
   const x = new Error((e && e.message) || 'error');
   const msg = String((e && e.message) || '');
+  x.detail = [e && e.code, msg].filter(Boolean).join(' ').slice(0, 160);
   x.code = (e && (e.code === '42501' || e.statusCode === '403' || e.status === 403)) || /row-level security|permission|admin only/i.test(msg) ? 'permission-denied'
     : (e && (e.status === 429 || e.code === '429')) ? 'resource-exhausted' : (e && e.code) || 'unknown';
   return x;

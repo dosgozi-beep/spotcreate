@@ -14,6 +14,10 @@ create table if not exists public.docs (
 );
 create index if not exists docs_work_idx on public.docs (col, (data->>'workId'));
 alter table public.docs enable row level security;
+-- サイト（ログインなしの人＝anon、ゲストログインした人＝authenticated）から表を使えるようにする。
+-- 実際に何を読めて書けるかは、下のルール（RLS）で決まる。
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on public.docs to anon, authenticated;
 alter table public.docs replica identity full;
 
 -- ========== ルールで使う関数 ==========
@@ -109,6 +113,8 @@ end $$;
 drop trigger if exists docs_guard on public.docs;
 create trigger docs_guard before insert or update on public.docs
   for each row execute function public.sc_guard();
+
+grant execute on function public.sc_is_admin(), public.sc_active(), public.sc_can_post(), public.sc_mine(text, jsonb) to anon, authenticated;
 
 -- ========== 画像の置き場所（Storage） ==========
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
