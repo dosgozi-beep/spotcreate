@@ -61,8 +61,11 @@ drop policy if exists docs_update on public.docs;
 drop policy if exists docs_delete on public.docs;
 
 -- 読む：だれでも（ログインなしでも）読める。運営の名簿と通報は、本人と運営だけ。
+-- 下書きの話は、作者と運営だけ。
 create policy docs_read on public.docs for select using (
-  col not in ('admins', 'reports') or id = auth.uid()::text or public.sc_is_admin()
+  (col not in ('admins', 'reports') or id = auth.uid()::text or public.sc_is_admin())
+  and (col <> 'episodes' or coalesce(data->>'draft', 'false') <> 'true'
+       or public.sc_mine(col, data) or public.sc_is_admin())
 );
 
 -- 新しく書く
